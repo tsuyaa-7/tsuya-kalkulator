@@ -1,0 +1,337 @@
+//Ini Tidak 100% Terbuat dari Tanganku Sendiri//
+
+
+
+<!doctype html>
+<html lang="id"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <title>Tsuya Kalkulator</title> 
+  <style>
+    
+
+body{
+  font-family: Arial, sans-serif;
+  padding:20px;
+  max-width:420px;
+  margin:auto;
+  background:#0f1011;
+}
+
+.calculator-container{
+  max-width:420px;
+  margin:0 auto;
+  padding:20px;
+  background:#111213;
+  border-radius:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  color:#e6eef0;
+}
+
+h2{
+  text-align:center;
+  margin-bottom:12px;
+  color:#fff;
+}
+
+.button-group{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-bottom:12px;
+}
+
+.copy-btn,
+.paste-btn{
+  border:2px solid #1e9e82;
+  background:transparent;
+  color:#1e9e82;
+  padding:10px 18px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.copy-btn:hover,
+.paste-btn:hover{
+  background:#1e9e82;
+  color:#000;
+}
+
+.calculator{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:auto repeat(5,1fr);
+  gap:8px;
+  margin-top:8px;
+}
+
+.display{
+  grid-column:span 4;
+  background:#0d1112;
+  color:#36f0b0;
+  padding:18px;
+  font-size:1.6rem;
+  border-radius:12px;
+  font-family:'Courier New', monospace;
+  text-align:right;
+  letter-spacing:1px;
+  overflow-x:auto;
+  white-space:nowrap;
+}
+
+
+.btn{
+  background:#141516;
+  color:#e6eef0;
+  border:none;
+  padding:18px 0;
+  border-radius:12px;
+  font-size:1.15rem;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,0.6);
+}
+
+.btn:hover{
+  transform:translateY(-3px);
+}
+
+.btn.clear{
+  background:#ff6b6b;
+  color:#111;
+  font-weight:700;
+}
+
+.btn.operator{
+  background:#1b1d1f;
+  color:#ff8383;
+  font-weight:700;
+}
+
+.btn.backspace{
+  background:#ffd56c;
+  color:#111;
+  font-weight:700;
+}
+
+.btn.equals{
+  background:#00d18a;
+  color:#0b0b0b;
+  font-weight:800;
+}
+
+.note{
+  text-align:center;
+  color:#aaa;
+  margin-top:12px;
+  font-size:0.9rem;
+}
+
+
+@media (max-width:480px){
+  .calculator-container{
+    padding:12px;
+  }
+}
+
+</style> 
+ </head> 
+ <body> 
+  <div class="calculator-container"> 
+   <h2>Tsuya Kalkulator</h2> 
+   <div class="button-group"> <button class="copy-btn" onclick="copyResult()">Salin</button> <button class="paste-btn" onclick="pasteText()">Tempel</button> 
+   </div>
+   <div class="calculator"> 
+    <div id="display" class="display">
+      0 
+    </div> <button class="btn clear" onclick="clearDisplay()">C</button> <button class="btn operator" onclick="appendOperator('+')">+</button> <button class="btn operator" onclick="appendOperator('-')">−</button> <button class="btn backspace" onclick="backspace()">⌫</button> <!-- Baris 2: 1 2 3 () --> <button class="btn number" onclick="appendNumber('1')">1</button> <button class="btn number" onclick="appendNumber('2')">2</button> <button class="btn number" onclick="appendNumber('3')">3</button> <button class="btn parens" onclick="appendParens()">()</button> <!-- Baris 3: 4 5 6 × --> <button class="btn number" onclick="appendNumber('4')">4</button> <button class="btn number" onclick="appendNumber('5')">5</button> <button class="btn number" onclick="appendNumber('6')">6</button> <button class="btn operator" onclick="appendOperator('*')">×</button> <!-- Baris 4: 7 8 9 ÷ --> <button class="btn number" onclick="appendNumber('7')">7</button> <button class="btn number" onclick="appendNumber('8')">8</button> <button class="btn number" onclick="appendNumber('9')">9</button> <button class="btn operator" onclick="appendOperator('/')">÷</button> <!-- Baris 5: 00 0 , = --> <button class="btn number" onclick="appendNumber('00')">00</button> <button class="btn number" onclick="appendNumber('0')">0</button> <button class="btn comma" onclick="appendComma()">,</button> <button class="btn equals" onclick="calculate()">=</button> 
+   </div> 
+   <div class="note">
+     Catatan: Tempel hanya bisa mendeteksi angka, jika ada huruf akan error. Pastikan menghapus huruf dengan menyisakan angka dan (+, -, ×, ÷). Menerima saran dan kritiknya <a href="https://wa.me/62895423198250" target="_blank" style="color:#4af3c4; text-decoration:none;">Kilik Ini</a><br>
+     <div>  
+     </div> 
+  </div> 
+  <script>
+        const display = document.getElementById('display');
+        let parensCount = 0;
+
+        function appendNumber(num) {
+            if (display.innerText === '0' || display.innerText === 'Error') {
+                display.innerText = num;
+            } else {
+                display.innerText += num;
+            }
+        }
+
+        function appendOperator(op) {
+            if (display.innerText === '0' && op === '-') {
+                display.innerText = '-';
+                return;
+            }
+            
+            const lastChar = display.innerText.slice(-1);
+            if ('+-*/'.includes(lastChar)) {
+                display.innerText = display.innerText.slice(0, -1) + op;
+            } else {
+                display.innerText += op;
+            }
+        }
+
+        function appendParens() {
+            if (parensCount % 2 === 0) {
+                if (display.innerText === '0' || display.innerText === 'Error') {
+                    display.innerText = '(';
+                } else {
+                    display.innerText += '(';
+                }
+            } else {
+                display.innerText += ')';
+            }
+            parensCount++;
+        }
+
+        function appendComma() {
+            const parts = display.innerText.split(/[\+\-\*\/]/);
+            const lastPart = parts[parts.length - 1];
+            if (!lastPart.includes('.') && !lastPart.includes(',')) {
+                display.innerText += ',';
+            }
+        }
+
+        function clearDisplay() {
+            display.innerText = '0';
+            parensCount = 0;
+        }
+
+        function backspace() {
+            if (display.innerText.length > 1 && display.innerText !== 'Error') {
+                display.innerText = display.innerText.slice(0, -1);
+            } else if (display.innerText !== 'Error') {
+                display.innerText = '0';
+            }
+        }
+
+        function calculate() {
+            try {
+                let expression = display.innerText
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/−/g, '-')
+                    .replace(/,/g, '.');
+                
+                expression = expression.replace(/--/g, '+');
+                
+                const negRegex = /([+\-*\/])-([0-9])/g;
+                let match;
+                let negCount = 0;
+                while ((match = negRegex.exec(expression)) !== null) {
+                    negCount++;
+                }
+                expression = expression.replace(/([+\-*\/])-([0-9])/g, '$1(-$2');
+                expression += ')'.repeat(negCount);
+                
+                let result = eval(expression);
+                
+                if (Number.isInteger(result)) {
+                    display.innerText = result;
+                } else {
+                    let formatted = result.toLocaleString('id-ID', { maximumFractionDigits: 8 });
+                    display.innerText = formatted.replace(/\./g, ',');
+                }
+            } catch {
+                display.innerText = 'Error';
+            }
+            parensCount = 0;
+        }
+
+        async function copyResult() {
+            try {
+                await navigator.clipboard.writeText(display.innerText);
+                alert('Hasil berhasil disalin ke clipboard: ' + display.innerText);
+            } catch (err) {
+                fallbackCopyToClipboard(display.innerText);
+            }
+        }
+
+        async function pasteText() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    let cleanedText = text.replace(/,/g, '.');
+                    if (display.innerText === '0' || display.innerText === 'Error') {
+                        display.innerText = text;
+                    } else {
+                        display.innerText += text;
+                    }
+                    alert('Teks berhasil ditempel: ' + text);
+                } else {
+                    alert('Clipboard kosong!');
+                }
+            } catch (err) {
+                const userInput = prompt('Tempel teks dari clipboard secara manual dan jangan lupa untuk menghapus huruf:');
+                if (userInput !== null) {
+                    if (display.innerText === '0' || display.innerText === 'Error') {
+                        display.innerText = userInput;
+                    } else {
+                        display.innerText += userInput;
+                    }
+                }
+            }
+        }
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('Hasil berhasil disalin ke clipboard (fallback): ' + text);
+                } else {
+                    alert('Gagal menyalin. Salin manual: ' + text);
+                }
+            } catch (err) {
+                alert('Gagal menyalin. Salin manual: ' + text);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (/[0-9]/.test(event.key)) {
+                appendNumber(event.key);
+            } else if ('+-*/'.includes(event.key)) {
+                appendOperator(event.key);
+            } else if (event.key === '.') {
+                appendComma();
+            } else if (event.key === ',') {
+                appendComma();
+            } else if (event.key === '(') {
+                appendParens();
+                parensCount = Math.floor(parensCount / 2) * 2;
+            } else if (event.key === ')') {
+                if (parensCount % 2 === 1) {
+                    display.innerText += ')';
+                    parensCount++;
+                }
+            } else if (event.key === 'Enter' || event.key === '=') {
+                calculate();
+            } else if (event.key === 'Backspace') {
+                backspace();
+            } else if (event.key === 'Escape') {
+                clearDisplay();
+            } else if (event.key === 'c' && event.ctrlKey) {
+                event.preventDefault();
+                copyResult();
+            } else if (event.key === 'v' && event.ctrlKey) {
+                event.preventDefault();
+                pasteText();
+            }
+        });
+    </script> 
+ </body>
+</html>
